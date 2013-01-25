@@ -10,7 +10,6 @@
  */
 
 #include "CountlyEvent.hpp"
-#include "CountlyRequest.hpp"
 
 #include "Countly.hpp"
 

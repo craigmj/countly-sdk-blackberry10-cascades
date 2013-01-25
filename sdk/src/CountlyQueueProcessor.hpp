@@ -32,22 +32,23 @@ class CountlyQueueProcessor : public QObject {
 protected:
 	static CountlyLog log;
 
-	QNetworkAccessManager _manager;
+	QNetworkAccessManager *_manager;
 	QAtomicInt *_queueLock;
 	QList<CountlyQueuedUrl *> *_queue;
 public:
-	CountlyQueueProcessor(QObject *parent, QAtomicInt *queueLock, QList<CountlyQueuedUrl *> *queue);
+	CountlyQueueProcessor(QObject *parent, QNetworkAccessManager *manager, QAtomicInt *queueLock, QList<CountlyQueuedUrl *> *queue);
 	virtual ~CountlyQueueProcessor();
 	void process();
 
 signals:
 	void networkInaccessible();
 	void delivered(CountlyQueuedUrl *);
-	void deliveryError(CountlyQueuedUrl *, const QString &message);
+	void deliveryError(CountlyQueuedUrl *, bool willRetry, const QString &message);
 	void flushCompleted();
 
 public slots:
 	void requestFinished(QNetworkReply *reply);
+	void requestError(QNetworkReply::NetworkError code);
 };
 } /* namespace countly */
 #endif /* COUNTLYQUEUEPROCESSOR_HPP_ */

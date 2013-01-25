@@ -16,7 +16,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
 {
     // this is where the server is started etc
     Application app(argc, argv);
-    countly::CountlyInit(&app, "http://10.0.0.6/", "73c1dbd6b5a917bfb54f50a87f2dc11fca84d0b9");
+    countly::CountlyInit(&app, "http://10.0.0.7/", "73c1dbd6b5a917bfb54f50a87f2dc11fca84d0b9");
 
     // localization support
     QTranslator translator;

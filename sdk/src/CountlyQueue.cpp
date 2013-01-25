@@ -31,9 +31,13 @@ CountlyLog CountlyQueue::log("CountlyQueue");
 
 
 CountlyQueue::CountlyQueue(QObject *parent) : QObject(parent) {
+	_database = NULL;
 }
 
 CountlyQueue::~CountlyQueue() {
+	if (NULL!=_database) {
+		delete _database;
+	}
 }
 
 void
@@ -45,7 +49,7 @@ CountlyQueue::flush() {
 	}
 	COUNTLY_DEBUG(log, "Initiating new flush");
 
-	CountlyQueueProcessor *processor = new CountlyQueueProcessor(this, &_queueLock, &_queue);
+	CountlyQueueProcessor *processor = new CountlyQueueProcessor(this, &_manager, &_queueLock, &_queue);
 	if (!connect(processor, SIGNAL(networkInaccessible()),
 			this, SLOT(processorNetworkInaccessible()))) {
 		COUNTLY_SEVERE(log, "Failed to connect processor networkInaccessible()");
@@ -54,8 +58,8 @@ CountlyQueue::flush() {
 			this, SLOT(processorDelivered(CountlyQueuedUrl *)))) {
 		COUNTLY_SEVERE(log, "Failed to connect processor delivered");
 	}
-	if (!connect(processor, SIGNAL(deliveryError(CountlyQueuedUrl*, const QString &)),
-			this, SLOT(processorDeliveryError(CountlyQueuedUrl*, const QString &)))) {
+	if (!connect(processor, SIGNAL(deliveryError(CountlyQueuedUrl*, bool, const QString &)),
+			this, SLOT(processorDeliveryError(CountlyQueuedUrl*, bool, const QString &)))) {
 		COUNTLY_SEVERE(log, "Failed to connect processor deliveryError");
 	}
 	if (!connect(processor, SIGNAL(flushCompleted()),
@@ -68,11 +72,22 @@ CountlyQueue::flush() {
 }
 
 void
-CountlyQueue::flushAndWait(int seconds) {
+CountlyQueue::flushAndWait(bb::cascades::Application *app, int seconds) {
 	flush();
 	COUNTLY_DEBUG(log, "flush and wait for " << seconds << "s");
-	qint64 stop = Countly::secondsSinceEpoch() + seconds;
-	while ((stop > Countly::secondsSinceEpoch()) && (1==_flushInProgress)) QThread::yieldCurrentThread();
+	qint64 now = Countly::secondsSinceEpoch();
+	qint64 stop = now + seconds;
+	qint64 extend = now + 1;
+	while (1==_flushInProgress) {
+		now = Countly::secondsSinceEpoch();
+		if (stop<now) break;
+		if (now >= extend) {
+			// We keep giving ourselves 2 additional seconds until we reach our stop point
+			app->extendTerminationTimeout();
+			extend = now + 1;
+		}
+		QThread::yieldCurrentThread();
+	}
 	COUNTLY_DEBUG(log, "flush and wait finished, flushInProgress = " << _flushInProgress._q_value);
 }
 
@@ -83,12 +98,21 @@ CountlyQueue::processorNetworkInaccessible() {
 
 void
 CountlyQueue::processorDelivered(CountlyQueuedUrl *url) {
+	if (_database) {
+		_database->deleteUrl(url);
+	}
 	COUNTLY_DEBUG(log, "Delivered URL : " << url->url().toString());
 }
 
 void
-CountlyQueue::processorDeliveryError(CountlyQueuedUrl *url, const QString &message) {
-	COUNTLY_DEBUG(log, "Delivery error on URL " << url->url().toString() << ": " << message);
+CountlyQueue::processorDeliveryError(CountlyQueuedUrl *url, bool willRetry, const QString &message) {
+	Q_UNUSED(message);	// only used in DEBUG build
+	if ((!willRetry) && (NULL!=_database)) {
+		_database->deleteUrl(url);
+	}
+	COUNTLY_DEBUG(log, "Delivery error on URL " << url->url().toString() << " (willRetry = "
+			<< (willRetry ? "YES" : "NO")
+			<< ": " << message);
 }
 
 void
@@ -103,8 +127,18 @@ CountlyQueue::processorFlushCompleted() {
 void
 CountlyQueue::queue(const QUrl &url) {
 	CountlyQueuedUrl *item = new CountlyQueuedUrl(this, url, -1);
+	if (_database) {
+		_database->storeUrl(item);
+	}
 	CountlySentry lock(&_queueLock);
 	_queue.append(item);
 	COUNTLY_DEBUG(log, "Queued: " << url.toString());
+}
+
+void
+CountlyQueue::setDatabase(const QString &name, long maxPersistedSessions, long sessionsExpireAfter) {
+	_database = new CountlyDatabase(this, maxPersistedSessions, sessionsExpireAfter);
+	_database->openDatabase(name);
+	_database->fetchAll(this, &_queue);
 }
 } /* namespace countly */

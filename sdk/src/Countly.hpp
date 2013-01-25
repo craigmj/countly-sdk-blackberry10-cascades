@@ -38,6 +38,7 @@ protected:
 	static CountlyLog log;
 	static Countly singleton;
 
+	bb::cascades::Application *_app;
 	CountlyQueue _queue;
 	QTimer _timer;
 	QString _server;
@@ -59,7 +60,7 @@ public:
 	 * path information ("/i?") - the class will add this itself.
 	 * @param appKey The application key for your application in Count.ly.
 	 */
-	void init(bb::cascades::Application *app, const QString &server, const QString &appKey);
+	void init(bb::cascades::Application *app, const QString &server, const QString &appKey, 			bool useDatabase=true, long maxPersistedSessions=-1, long sessionsExpireAfter=-1);
 
 	/*------------------------------------- methods used by CountlyEvent class -----------------------------*/
 	/**  Return the number of seconds since the epoch */
@@ -86,12 +87,14 @@ public slots:
 	void asleep();
 	void awake();
 	void aboutToQuit();
+	void manualExit();
 	void processStateChanged(bb::ProcessState::Type processState);
 	void unixSignal(int);
 	void timerTimeout();
 };
 
-void CountlyInit(bb::cascades::Application *app, const QString &server, const QString &appKey);
+void CountlyInit(bb::cascades::Application *app, const QString &server, const QString &appKey,
+			bool useDatabase=true, long maxPersistedSessions=-1, long sessionsExpireAfter=-1);
 
 
 } /* namespace countly */

@@ -12,7 +12,8 @@
 
 namespace countly {
 /**
- * Simply utility class to manage a lock as RAII
+ * Simply utility class to manage a lock as RAII.
+ * The lock is based around an AtomicInt, which functions as an inter-process semaphore.
  */
 class CountlySentry {
 protected:
