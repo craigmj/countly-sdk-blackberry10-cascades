@@ -1,23 +1,25 @@
-countly-sdk-blackberry10-cascades
-=================================
+<html>
+<body>
+<h1>countly-sdk-blackberry10-cascades</h1>
+<h1>=================================</h1>
 
-VERSION: alpha 0.1
+<p>VERSION: alpha 1.0</p>
 
-A BlackBerry 10 Cascades SDK for count.ly
+<p>NEXT VERSION: beta 1.0</p>
 
-This is very first-draft code!
+<p>A BlackBerry 10 Cascades SDK for count.ly</p>
 
-<h1>Installing Countly BlackBerry 10 Cascades SDK</h1>
+<h2>Installing Countly BlackBerry 10 Cascades SDK</h2>
 
 <ol>
 <li>Add all the .cpp and .hpp files in the sdk/ directory to your project (I symlink them).</li>
 <li>Add the following line to your .pro file:<br />
 	<code>LIBS += -lbb -lbbdata -lbbplatform -lbbdevice</code>
 </li>
-<li>Add the Internet (access_internet) and Device Identifying Information (read_device_identifying_information) permissions to your bar-descriptor.xml</li>
+<li>Add the Internet (<code>access_internet</code>) and Device Identifying Information (<code>read_device_identifying_information</code>) permissions to your bar-descriptor.xml</li>
 </ol>
 
-<h1>Usage</h1>
+<h2>USAGE</h2>
 
 <ol>
 	<li>At the top of your main.cpp file:<br />
@@ -42,23 +44,49 @@ This is very first-draft code!
 	</li>
 </ol>
 
-EXAMPLE
-=======
-See project example in countly-sdk-example directory for example application.
+<h2>PERSISTENCE</h2>
+<p>
+	By default, events are persisted to a sqlite database that the SDK will create in your app's data folder. Any events that are not successfully delivered, are persisted to this database, and the application will attempt to deliver them on the next execution.
+</p>
+<p>
+	Because one does not want to fill a user's device with events, events are deleted if:
+	<ol>
+		<li>An attempt to deliver them receives a JSON reponse from the server, but it is not 'Success': in this case, we presume there is something wrong with the event, and discard it.</li>
+		<li>There are more than 5 'sessions' (defined as a start of the app) and the event is part of a session that is more than 2 weeks old.</li>
+	</ol>
+	You can change these parameters by providing additional parameters to the CountlyInit function. It's full signature is:</p>
+	<code>
+		void CountlyInit(bb::cascades::Application *app, const QString &server, const QString &appKey,
+			bool useDatabase=true, long maxPersistedSessions=-1, long sessionsExpireAfter=-1);
+	</code>
+	<p>The last 3 parameters are:</p>
+	<dl>
+		<dt>useDatabase</dt>
+		<dd>Set to <code>false</code> if you don't want to persist events to the database.</dd>
+		<dt>maxPersistedSessions</dt>
+		<dd>Set to the maximum number of sessions that you want persisted. Note that sessions will only be discarded when there are more than that number AND they have exceeded the expiry period.</dd>
+		<dt>sessionsExpireAfter</dt>
+		<dd>The number of seconds after which a session is considered expired. After this period, AND if there are more than maxPersistedSessions, the excess sessions will be discarded.</dd>
+	</dl>
 
-LOGGING
-=======
-The Count.ly framework logs through CountlyLog::log(..) method. Easy location to change or reroute logging.
+<h2>EXAMPLE</h2>
+<p>
+See project example in <code>countly-sdk-example directory</code> for example application.
+</p>
 
-TODOS
-=====
-At the moment everything is very rough, and there is no queuing at all (the class is there, but not implemented), no heartbeat, and every event is sent when it is created, not held back and sent in the future.
-Also, if the application cannot send an event at once, the event is discarded.
+<h2>LOGGING</h2>
+<p>The Count.ly framework logs through CountlyLog::log(..) method. Easy location to change or reroute logging. By default, no logs are written when in a Release build.</p>
 
-In other words, this is very much a bare-bones, just working implementation.
+<h2>TODOS</h2>
+<ol>
+	<li>It needs testing!</li>
+	<li>QML integration only happens through calls to C++. I'm trying to work out a better method.</li>
+</ol>
 
-I'm working on queuing and storage for offline logging. And proper QML integration (at the moment, you need to send to a method on a C++ class - see the countly-sdk-example for example).
-
-LICENCE
-=======
+<h2>LICENCE</h2>
+<p>
 Please see the LICENCE file
+</p>
+
+</body>
+</html>

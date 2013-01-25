@@ -71,7 +71,7 @@
     <configuration name="Device-Release">
        <entryPointType>Qnx/Cascades</entryPointType>
        <platformArchitecture>armle-v7</platformArchitecture>
-       <asset path="arm/o.le-v7/countly_sdk_example.so" entry="true" type="Qnx/Elf">countly_sdk_example.so</asset>
+       <asset path="x86/o-g/countly_sdk_example" entry="true" type="Qnx/Elf">countly_sdk_example</asset>
     </configuration>
     <configuration name="Device-Profile">
        <platformArchitecture>armle-v7</platformArchitecture>

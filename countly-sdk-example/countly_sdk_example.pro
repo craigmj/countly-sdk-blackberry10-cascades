@@ -4,5 +4,4 @@ CONFIG += qt warn_on cascades10
 
 LIBS += -lbb -lbbdata -lbbplatform -lbbdevice
 
-
 include(config.pri)
