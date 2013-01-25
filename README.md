@@ -1,11 +1,8 @@
 <html>
 <body>
 <h1>countly-sdk-blackberry10-cascades</h1>
-<h1>=================================</h1>
 
-<p>VERSION: alpha 1.0</p>
-
-<p>NEXT VERSION: beta 1.0</p>
+<p>VERSION:  beta 1.0 for C++ (alpha for QML)</p>
 
 <p>A BlackBerry 10 Cascades SDK for count.ly</p>
 
