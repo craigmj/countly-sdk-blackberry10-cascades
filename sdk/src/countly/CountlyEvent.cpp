@@ -3,6 +3,10 @@
  *
  *  Created on: 11 Jan 2013
  *      Author: craig
+ *
+ *  (c) 2013 Craig Mason-Jones. All Right Reserved.
+ *  Please see LICENCE for licence details.
+ *
  */
 
 #include "CountlyEvent.hpp"
@@ -18,35 +22,21 @@ namespace countly {
 
 CountlyLog CountlyEvent::log("CountlyEvent");
 
-CountlyEvent::CountlyEvent(QObject *parent) : QObject(parent) {}
+CountlyEvent::CountlyEvent(QObject *parent) : QObject(parent) {
+	_timestamp = Countly::secondsSinceEpoch();
+}
 
-CountlyEvent::CountlyEvent(QObject *parent, const QString &key, int count, double sum) : QObject(parent), _key(key), _count(count), _sum(sum) {
+CountlyEvent::CountlyEvent(QObject *parent, const QString &key, int count, double sum, long timestamp) : QObject(parent), _key(key), _count(count), _sum(sum) {
+	_timestamp = (0==timestamp) ? timestamp : Countly::secondsSinceEpoch();
 }
 
 CountlyEvent::~CountlyEvent() {
+
 }
 
 void
 CountlyEvent::send() {
 	Countly::instance()->sendEvent(*this);
-}
-
-void
-CountlyEvent::populateUrl(QUrl &url) {
-	url.addQueryItem("key", _key);
-	QString count;
-	count.sprintf("%d", _count);
-	url.addQueryItem("count", count);
-	if (0!=_sum) {
-		QString sum;
-		sum.sprintf("%f", _sum);
-		url.addQueryItem("sum", sum);
-	}
-	JsonDataAccess json;
-	QString jsonString;
-	json.saveToBuffer(_segmentation, &jsonString);
-
-	url.addQueryItem("segmentation", jsonString);
 }
 
 QVariant

@@ -3,6 +3,10 @@
  *
  *  Created on: 18 Jan 2013
  *      Author: craig
+ *
+ *  (c) 2013 Craig Mason-Jones. All Right Reserved.
+ *  Please see LICENCE for licence details.
+ *
  */
 
 #ifndef COUNTLYLOG_HPP_
@@ -12,6 +16,24 @@
 #include <QString>
 
 #include "CountlyLogStream.hpp"
+
+/**
+ * All Countly Log code can be quickly excluded from the app by undef'ing _DEBUG (or some other symbol if you prefer)
+ */
+#ifdef QT_DEBUG
+#define COUNTLY_TRACE(log, msg) { log.trace() << msg; }
+#define COUNTLY_DEBUG(log, msg) { log.debug() << msg; }
+#define COUNTLY_INFO(log, msg) { log.info() << msg; }
+#define COUNTLY_WARN(log, msg) { log.warn() << msg; }
+#define COUNTLY_SEVERE(log, msg) { log.severe() << msg; }
+#else
+#define COUNTLY_TRACE(log, msg)
+#define COUNTLY_DEBUG(log, msg)
+#define COUNTLY_INFO(log, msg)
+#define COUNTLY_WARN(log, msg)
+#define COUNTLY_SEVERE(log, msg)
+#endif
+
 
 namespace countly {
 
