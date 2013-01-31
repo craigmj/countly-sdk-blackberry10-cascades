@@ -75,7 +75,7 @@ public:
 	void event();
 
 protected:
-	QUrl createSendUrl(bool includeSessionDuration=true);
+	QUrl createSendUrl();
 	void sendUrl(const QUrl &url);
 
 public:

@@ -198,7 +198,7 @@ Countly::processStateChanged(bb::ProcessState::Type processState) {
 void
 Countly::startApp() {
 	CountlyMetrics metrics;
-	QUrl url = createSendUrl(false);
+	QUrl url = createSendUrl();
 	url.addQueryItem("begin_session", "1");
 	url.addQueryItem("metrics", metrics.toJson());
 	url.addQueryItem("sdk_version", "1.0");
@@ -234,7 +234,7 @@ Countly::event() {
 }
 
 QUrl
-Countly::createSendUrl(bool includeSessionDuration) {
+Countly::createSendUrl() {
 	QUrl url(_server);
 	url.addQueryItem("app_key", _appKey);
 	url.addQueryItem("device_id", _deviceId);
@@ -242,11 +242,6 @@ Countly::createSendUrl(bool includeSessionDuration) {
 	long sec = secondsSinceEpoch();
 	timestamp.sprintf("%ld", sec);
 	url.addQueryItem("timestamp", timestamp);
-	if (includeSessionDuration) {
-		QString sessionDuration;
-		sessionDuration.sprintf("%d", HEARTBEAT_INTERVAL);
-		url.addQueryItem("session_duration", sessionDuration);
-	}
 	return  url;
 }
 
@@ -271,7 +266,10 @@ Countly::sendEvent(CountlyEvent &event) {
 void
 Countly::timerTimeout() {
 	COUNTLY_DEBUG(log, "timer timeout");
-	QUrl url = createSendUrl();
+	QUrl url = createSendUrl();	// true to add session duration
+	QString sessionDuration;
+	sessionDuration.sprintf("%d", HEARTBEAT_INTERVAL);
+	url.addQueryItem("session_duration", sessionDuration);
 	sendUrl(url);
 	_queue.flush();
 }
