@@ -41,6 +41,8 @@
 	</li>
 </ol>
 
+**Note:** If you use Countly Cloud, you should set your host to https://cloud.count.ly in step 2.
+
 <h2>PERSISTENCE</h2>
 <p>
 	By default, events are persisted to a sqlite database that the SDK will create in your app's data folder. Any events that are not successfully delivered, are persisted to this database, and the application will attempt to deliver them on the next execution.
