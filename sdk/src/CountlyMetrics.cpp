@@ -39,7 +39,7 @@ CountlyMetrics::CountlyMetrics() {
 	 */
 	// OS and OS_VERSION
 	PlatformInfo platform;
-	insert("_os", "BB10");
+	insert("_os", "BlackBerry");
 	insert("_os_version", platform.osVersion());
 
 	// DEVICE
